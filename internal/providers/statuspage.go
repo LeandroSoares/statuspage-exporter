@@ -43,6 +43,9 @@ type spSummary struct {
         Group   bool   `json:"group"`
         GroupID string `json:"group_id"`
     } `json:"components"`
+    Incidents             []json.RawMessage `json:"incidents"`
+    UnresolvedIncidents   []json.RawMessage `json:"unresolved_incidents"`
+    ScheduledMaintenances []json.RawMessage `json:"scheduled_maintenances"`
 }
 
 func (p *StatuspageProvider) Fetch(ctx context.Context) (Result, error) {
@@ -79,7 +82,23 @@ func (p *StatuspageProvider) Fetch(ctx context.Context) (Result, error) {
             Status: mapStatuspage(c.Status),
         })
     }
-    logx.Debugf("statuspage parsed components=%d page=%s", len(out.Components), p.name)
+    // Determine open incidents: prefer explicit unresolved incidents from API if present.
+    open := 0
+    if len(s.UnresolvedIncidents) > 0 {
+        open = len(s.UnresolvedIncidents)
+    } else if len(s.Incidents) > 0 {
+        // Many pages return only `incidents` in summary.json as unresolved
+        open = len(s.Incidents)
+    } else {
+        // Fallback: count non-operational components (excluding maintenance)
+        for _, comp := range out.Components {
+            if comp.Status != StatusOperational && comp.Status != StatusUnderMaintenance {
+                open++
+            }
+        }
+    }
+    out.OpenIncidents = open
+    logx.Debugf("statuspage parsed components=%d open_incidents=%d page=%s", len(out.Components), open, p.name)
     return out, nil
 }
 

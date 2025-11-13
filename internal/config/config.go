@@ -21,6 +21,8 @@ type Common struct {
     UserAgent string `yaml:"user_agent"`
     // Log level: debug|info|warn|error
     LogLevel string `yaml:"log_level"`
+    // Treat unknown status as up (1) in statuspage_component_up
+    UnknownIsUp bool `yaml:"unknown_is_up"`
 }
 
 type Page struct {
@@ -81,6 +83,12 @@ func Load(path string) (*Config, error) {
     }
     if c.Common.UserAgent == "" {
         c.Common.UserAgent = "statuspage-exporter/0.1"
+    }
+    // Default: consider unknown as up to avoid false positives
+    // Users can set unknown_is_up: false to change behavior
+    // Only set default when unset (bool zero is false), so flip to true here
+    if !c.Common.UnknownIsUp {
+        c.Common.UnknownIsUp = true
     }
     return &c, nil
 }

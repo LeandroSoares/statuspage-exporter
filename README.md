@@ -28,6 +28,7 @@ See `config.example.yaml` for a full example. Key fields:
 - `server.listen`: HTTP listen address
 - `common.interval`: default scrape interval
 - `common.timeout`: default HTTP timeout
+- `common.unknown_is_up`: if true, unknown status maps to up=1 (default true)
 - `pages`: list of targets
   - `type`: one of `statuspage|instatus|statusio_rss|azuredevops|gcp|aws_rss|betterstack`
   - `url`: base URL or provider-specific endpoint
@@ -48,6 +49,7 @@ See `config.example.yaml` for a full example. Key fields:
 ## Metrics
 
 - `statuspage_component_up{provider,page,component,group,region}` — 1 if operational, else 0
+  - When `common.unknown_is_up: true`, unknown also yields 1
 - `statuspage_component_status_code{provider,page,component,group,region,status}` — normalized code
   - 0=unknown, 1=operational, 2=maintenance, 3=degraded, 4=partial_outage, 5=major_outage
 - `statuspage_open_incidents{provider,page}` — open incidents when available

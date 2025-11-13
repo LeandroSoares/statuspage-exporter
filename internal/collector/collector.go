@@ -17,6 +17,7 @@ type Exporter struct {
     providers []providers.Provider
     caches    []*cacheEntry
     metas     []pageMeta
+    unknownIsUp bool
 
     up         *prometheus.Desc
     statusCode *prometheus.Desc
@@ -49,6 +50,7 @@ func New(cfg *config.Config) (*Exporter, error) {
         providers: ps,
         caches:    make([]*cacheEntry, len(ps)),
         metas:     metas,
+        unknownIsUp: cfg.Common.UnknownIsUp,
         up: prometheus.NewDesc(
             "statuspage_component_up",
             "Component operational status (1=up, 0=not)",
@@ -153,7 +155,7 @@ func (e *Exporter) collectFromCache(i int, ch chan<- prometheus.Metric) {
         keyUp := fmt.Sprintf("%s|%s|%s|%s|%s", res.Provider, res.Page, c.Name, c.Group, c.Region)
         if _, ok := seenUp[keyUp]; !ok {
             up := 0.0
-            if c.Status == providers.StatusOperational {
+            if c.Status == providers.StatusOperational || (c.Status == providers.StatusUnknown && e.unknownIsUp) {
                 up = 1.0
             }
             ch <- prometheus.MustNewConstMetric(e.up, prometheus.GaugeValue, up, res.Provider, res.Page, c.Name, c.Group, c.Region)

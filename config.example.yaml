@@ -6,6 +6,7 @@ common:
   timeout: 10s
   user_agent: statuspage-exporter/0.1
   log_level: info
+  unknown_is_up: true
 
 pages:
   # Atlassian Statuspage examples (MongoDB, Twilio, Datadog, CloudAMQP, many others)
@@ -49,7 +50,7 @@ pages:
     user_friendly_url: https://status.dev.azure.com
 
   # Google Cloud incidents JSON
-  - name: google-cloud
+  - name: gcp
     type: gcp
     url: https://status.cloud.google.com/incidents.json
     user_friendly_url: https://status.cloud.google.com
