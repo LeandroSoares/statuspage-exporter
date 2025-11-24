@@ -5,3 +5,6 @@ dist/
 *.log
 .idea/
 .vscode/
+config.yaml
+statuspage-exporter
+statuspage-exporter.exe
